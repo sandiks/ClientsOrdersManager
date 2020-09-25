@@ -29,11 +29,12 @@ namespace ClientsOrdersManager.Controllers
             .ToListAsync();
             return View(orders);
         }
-        [HttpGet("Order/ClientOrder", Name = "Order_ClientOrder")]
-        public async Task<IActionResult> ClientOrder(int id)
+        [HttpGet("Order/ClientOrders", Name = "Order_ClientOrders")]
+        public async Task<IActionResult> ClientOrders(int id)
         {
             var orders = await _context.Orders
             .Include(c => c.Service)
+            .Include(c => c.Client)
             .Where(c => c.ClientId == id)
             .AsNoTracking()
             .ToListAsync();
