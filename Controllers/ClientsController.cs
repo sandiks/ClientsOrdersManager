@@ -11,34 +11,22 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ClientsOrdersManager.Controllers
 {
-    public class OrderController : Controller
+    public class ClientsController : Controller
     {
         private readonly AppDbContext _context;
 
-        public OrderController(AppDbContext context)
+        public ClientsController(AppDbContext context)
         {
             _context = context;
         }
 
         public async Task<IActionResult> Index()
         {
-            var orders = await _context.Orders
-            .Include(c => c.Service)
-            .Include(c => c.Client)
+            var clients = await _context.Clients
+            .Include(c => c.Orders)
             .AsNoTracking()
             .ToListAsync();
-            return View(orders);
-        }
-        [HttpGet("Order/ClientOrders", Name = "Order_ClientOrders")]
-        public async Task<IActionResult> ClientOrders(int id)
-        {
-            var orders = await _context.Orders
-            .Include(c => c.Service)
-            .Include(c => c.Client)
-            .Where(c => c.ClientId == id)
-            .AsNoTracking()
-            .ToListAsync();
-            return View(orders);
+            return View(clients);
         }
 
         public async Task<IActionResult> Details(int? id)
@@ -48,15 +36,15 @@ namespace ClientsOrdersManager.Controllers
                 return NotFound();
             }
 
-            var order = await _context.Orders
+            var client = await _context.Clients
                  .FirstOrDefaultAsync(c => c.Id == id);
 
-            if (order == null)
+            if (client == null)
             {
                 return NotFound();
             }
 
-            return View(order);
+            return View(client);
         }
 
         public IActionResult Create()
@@ -67,13 +55,13 @@ namespace ClientsOrdersManager.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(
-            [Bind("ClientId,ServiceId,Amount")] Order order)
+            [Bind("FirstName,LastName,Phone,Address")] Client client)
         {
             try
             {
                 if (ModelState.IsValid)
                 {
-                    _context.Add(order);
+                    _context.Add(client);
                     await _context.SaveChangesAsync();
                     return RedirectToAction(nameof(Index));
                 }
@@ -85,7 +73,7 @@ namespace ClientsOrdersManager.Controllers
                     "Try again, and if the problem persists " +
                     "see your system administrator.");
             }
-            return View(order);
+            return View(client);
         }
 
         public async Task<IActionResult> Edit(int? id)
@@ -95,12 +83,12 @@ namespace ClientsOrdersManager.Controllers
                 return NotFound();
             }
 
-            var order = await _context.Orders.FindAsync(id);
-            if (order == null)
+            var client = await _context.Clients.FindAsync(id);
+            if (client == null)
             {
                 return NotFound();
             }
-            return View(order);
+            return View(client);
         }
 
         [HttpPost, ActionName("Edit")]
@@ -111,11 +99,11 @@ namespace ClientsOrdersManager.Controllers
             {
                 return NotFound();
             }
-            var orderToUpdate = await _context.Orders.FirstOrDefaultAsync(s => s.Id == id);
-            if (await TryUpdateModelAsync<Order>(
-                orderToUpdate,
+            var clientToUpdate = await _context.Clients.FirstOrDefaultAsync(s => s.Id == id);
+            if (await TryUpdateModelAsync<Client>(
+                clientToUpdate,
                 "",
-                s => s.ServiceId, s => s.ClientId, s => s.Amount))
+                s => s.FirstName, s => s.LastName, s => s.Phone, s => s.Address))
             {
                 try
                 {
@@ -124,12 +112,13 @@ namespace ClientsOrdersManager.Controllers
                 }
                 catch (DbUpdateException /* ex */)
                 {
+                    //Log the error (uncomment ex variable name and write a log.)
                     ModelState.AddModelError("", "Unable to save changes. " +
                         "Try again, and if the problem persists, " +
                         "see your system administrator.");
                 }
             }
-            return View(orderToUpdate);
+            return View(clientToUpdate);
         }
 
     }

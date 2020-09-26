@@ -6,7 +6,7 @@
 
 <h1>Edit</h1>
 
-<h4>Client</h4>
+<h4>Client-@Model.Id</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
@@ -45,7 +45,7 @@
     </div>
 </div>
 <div>
-    <a href="@Url.RouteUrl("Order_ClientOrders")">Orders</a>
+    <a href="@Url.RouteUrl("Orders_ClientOrders", new { id = @Model.Id })">Orders</a>
 </div>
 <div>
     <a asp-action="Index">Back to List</a>
